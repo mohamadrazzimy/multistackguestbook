@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guestbook</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f6fa; color: #17243a;
+      font: 16px/1.6 system-ui, sans-serif; }
+    header, footer { background: #12345a; color: white; padding: 24px; }
+    header h1, header p { margin: 0; }
+    main { max-width: 1000px; margin: 28px auto; padding: 0 20px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    section { background: white; padding: 24px; border-radius: 12px; }
+    h2 { margin-top: 0; }
+    label { display: block; font-weight: 600; margin-top: 16px; }
+    input, textarea, button { font: inherit; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #8090a5;
+      border-radius: 6px; }
+    textarea { min-height: 150px; resize: vertical; }
+    button { background: #12345a; color: white; border: 0;
+      border-radius: 6px; padding: 10px 18px; margin-top: 16px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    small, time { color: #536278; }
+    article { border-top: 1px solid #dce3ed; padding: 16px 0; }
+    article p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #status { min-height: 1.6em; }
+    footer { text-align: center; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header><h1>Guestbook</h1><p>Thanks for visiting. Leave us a comment.</p></header>
+  <main>
+    <section aria-labelledby="form-title">
+      <h2 id="form-title">Sign the guestbook</h2>
+      <form id="guestbook">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" required maxlength="254"
+          autocomplete="email" aria-describedby="privacy">
+        <small id="privacy">We save your email, but do not display it publicly.</small>
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="comment" required maxlength="2000"
+          aria-describedby="comment-help"></textarea>
+        <small id="comment-help">Your comment will be public. Maximum 2,000 UTF-8 bytes.</small>
+        <button type="submit">Submit comment</button>
+      </form>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+    <section aria-labelledby="entries-title">
+      <h2 id="entries-title">Recent comments</h2>
+      <div id="entries" aria-live="polite">Loading comments...</div>
+    </section>
+  </main>
+  <footer>Guestbook demo</footer>
+  <script>
+    const form = document.querySelector('#guestbook');
+    const status = document.querySelector('#status');
+    const entries = document.querySelector('#entries');
+    async function loadEntries() {
+      const response = await fetch('/api/entries', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Could not load comments.');
+      const items = await response.json();
+      entries.replaceChildren();
+      if (!items.length) entries.textContent = 'Be the first to leave a comment.';
+      for (const item of items) {
+        const article = document.createElement('article');
+        const time = document.createElement('time');
+        time.dateTime = item.createdAt;
+        time.textContent = new Date(item.createdAt).toLocaleString();
+        const p = document.createElement('p');
+        p.textContent = item.comment;
+        article.append(time, p);
+        entries.append(article);
+      }
+    }
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const email = form.elements.email.value.trim();
+      const comment = form.elements.comment.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+          !/^[\x21-\x7e]+$/.test(email) || email.length > 254) {
+        status.textContent = 'Enter a valid ASCII email address.';
+        return;
+      }
+      if (!comment || new TextEncoder().encode(comment).length > 2000) {
+        status.textContent = 'Enter a comment of 1 to 2,000 UTF-8 bytes.';
+        return;
+      }
+      const button = form.querySelector('button');
+      button.disabled = true;
+      status.textContent = 'Saving...';
+      try {
+        const response = await fetch('/api/entries', {
+          method: 'POST',
+          body: new URLSearchParams({ email, comment })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not save comment.');
+        form.reset();
+        status.textContent = 'Thank you! Your comment has been saved.';
+        try { await loadEntries(); }
+        catch { status.textContent += ' Refresh the page to reload comments.'; }
+      } catch (error) {
+        status.textContent = error.message;
+      } finally { button.disabled = false; }
+    });
+    loadEntries().catch(error => { entries.textContent = error.message; });
+  </script>
+</body>
+</html>

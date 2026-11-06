@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Guestbook, Seven Stacks — Tutorial</title>
+<meta name="description" content="Build an email and comment guestbook in seven Docker stacks with Windows and PowerShell.">
+<style>
+:root{--ink:#18283c;--muted:#586d83;--blue:#1b507a;--line:#d8e2eb;--paper:#fff;--bg:#f4f7fb}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--blue);text-underline-offset:3px}a:hover{color:#082e4c}.skip{position:absolute;top:-80px;left:12px;padding:10px;background:white;z-index:5}.skip:focus{top:10px}header{background:#102f4b;color:#fff;padding:52px max(24px,calc((100vw - 1300px)/2));border-bottom:5px solid #53c5b8}.eyebrow{font-size:12px;letter-spacing:2px;font-weight:700;color:#9ee0d7;text-transform:uppercase}h1{font-size:clamp(30px,4vw,49px);line-height:1.15;letter-spacing:-1px;margin:14px 0}header p{max-width:770px;color:#cddfec;margin:12px 0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.chips span{padding:3px 12px;border:1px solid #47647b;border-radius:30px;font-size:12px}.layout{max-width:1360px;margin:auto;display:grid;grid-template-columns:255px minmax(0,1fr);gap:36px;padding:36px 30px 60px}aside{align-self:start;position:sticky;top:24px;max-height:calc(100vh - 48px);overflow:auto;font-size:12px}aside p{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted)}nav a{display:block;text-decoration:none;padding:7px 12px;border-left:2px solid var(--line);line-height:1.5}nav a:hover{background:#e5edf5;border-color:var(--blue)}main{min-width:0;background:white;border:1px solid var(--line);border-radius:12px;padding:32px 42px;box-shadow:0 4px 18px #13283e05}h2{font-size:25px;line-height:1.3;margin:46px 0 18px;padding-top:18px;border-top:1px solid var(--line);letter-spacing:-.5px}h2:first-child{margin-top:0;border-top:0;padding-top:0}p{margin:16px 0}li{margin:7px 0}code{font:0.86em/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;background:#edf2f7;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}.code-block{margin:22px 0;border:1px solid #243e55;border-radius:9px;overflow:hidden;background:#102437;color:#e4edf6}.code-bar{display:flex;align-items:center;justify-content:space-between;background:#1c354b;padding:7px 14px;color:#a8c8dc;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px}.copy{font:12px system-ui;border:1px solid #608098;background:transparent;color:#e4edf6;border-radius:5px;padding:4px 10px;cursor:pointer}.copy:hover{background:#304e65}pre{margin:0;padding:20px;overflow:auto;tab-size:4;font-size:12px;line-height:1.7}pre code{padding:0;border-radius:0;background:none;color:inherit;font-size:inherit;overflow-wrap:normal;white-space:pre}.table-scroll{overflow:auto;margin:22px 0}table{border-collapse:collapse;width:100%;font-size:13px;text-align:left}th{background:#eaf1f7;color:#234863;font-weight:700}td,th{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}td code{font-size:11px}footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 24px 35px}button:focus-visible,a:focus-visible,pre:focus-visible{outline:3px solid #36b6a8;outline-offset:3px}main a{overflow-wrap:anywhere}@media(max-width:950px){.layout{grid-template-columns:200px minmax(0,1fr);gap:20px;padding:24px 18px}main{padding:24px}pre{font-size:11px}}@media(max-width:720px){header{padding:32px 22px}.layout{display:block;padding:20px 12px}aside{position:static;max-height:none;margin-bottom:24px}nav{max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:8px}main{padding:20px 17px}h2{font-size:22px}.chips{gap:5px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{body{background:white;font-size:10pt}header{background:white;color:#102f4b;padding:15px 0}header p{color:#334e66}.eyebrow{color:#1b507a}.chips,aside,.copy,.skip,footer{display:none}.layout{display:block;padding:0}main{border:0;box-shadow:none;padding:0}h2{break-after:avoid}.code-block{background:#f5f7fa;color:#18283c;border:1px solid #ccc;overflow:visible}.code-bar{background:#e8eef4;color:#234863}pre{white-space:pre-wrap;overflow:visible;font-size:8pt}pre code{white-space:pre-wrap;overflow-wrap:anywhere}table{font-size:9pt}a{color:inherit;text-decoration:none}}
+</style></head><body><a class="skip" href="#tutorial">Skip to tutorial</a>
+<header><div class="eyebrow">Docker workshop · Windows 11 + PowerShell 7</div><h1>One Guestbook, Seven Stacks</h1><p>Build the same email-and-comment guestbook with PHP, Java, ASP.NET Core, Node.js and Python.</p><div class="chips"><span>7 backend implementations</span><span>Private email storage</span><span>Persistent entries</span><span>Complete code examples</span></div></header>
+<div class="layout"><aside aria-label="Tutorial contents"><p>On this page</p><nav><a href="#collecting-emails-and-comments-with-php-java-asp-net-core-node-js-and-python-in-docker">Collecting emails and comments with PHP, Java, ASP.NET Core, Node.js and Python in Docker</a><a href="#what-you-need">What you need</a><a href="#the-plan">The plan</a><a href="#step-0-create-the-project">Step 0: Create the project</a><a href="#step-1-build-the-shared-guestbook-page">Step 1: Build the shared guestbook page</a><a href="#step-2-php-with-apache">Step 2: PHP with Apache</a><a href="#step-3-php-with-nginx-and-php-fpm">Step 3: PHP with Nginx and PHP-FPM</a><a href="#step-4-java-without-a-web-framework">Step 4: Java without a web framework</a><a href="#step-5-java-spring-boot">Step 5: Java Spring Boot</a><a href="#step-6-asp-net-core">Step 6: ASP.NET Core</a><a href="#step-7-node-js-with-express">Step 7: Node.js with Express</a><a href="#step-8-python-with-flask-and-gunicorn">Step 8: Python with Flask and Gunicorn</a><a href="#step-9-verify-the-complete-workflow">Step 9: Verify the complete workflow</a><a href="#what-changed-from-the-portal-tutorial">What changed from the portal tutorial?</a><a href="#updating-the-shared-page">Updating the shared page</a><a href="#troubleshooting">Troubleshooting</a><a href="#before-making-it-public">Before making it public</a><a href="#clean-up-while-retaining-entries">Clean up while retaining entries</a><a href="#documentation-references">Documentation references</a></nav></aside><main id="tutorial"><h2 id="collecting-emails-and-comments-with-php-java-asp-net-core-node-js-and-python-in-docker">Collecting emails and comments with PHP, Java, ASP.NET Core, Node.js and Python in Docker</h2>
+<p>A step-by-step walkthrough for Windows 11, Docker Desktop and PowerShell 7.</p>
+<p>Every web stack can serve a page. A guestbook takes the exercise one step further: the browser sends an email address and a comment, the server validates and saves both, and the page displays the latest comments.</p>
+<p>This tutorial builds the same guestbook with seven backends: PHP with Apache, PHP with Nginx, plain Java, Spring Boot, ASP.NET Core, Node.js and Python. All runtimes and build tools run inside Docker. You do not need to install them on Windows.</p>
+<p>Visitors can submit an email address and a comment. Comments appear immediately, newest first; email addresses remain private and are never included in the public API. Refreshing the page or recreating a container preserves entries because each stack uses its own Docker volume.</p>
+<p>This is a local learning project. Each stack has an independent guestbook. Run one or all seven; submitting on port 8081 does not create an entry on port 8082.</p>
+<p>Validation note: the tutorial&#x27;s code and file layout were reviewed and selected checks were run during preparation. The complete seven-container build and runtime matrix was not executed in this environment; run the verification steps on Docker Desktop.</p>
+<h2 id="what-you-need">What you need</h2>
+<ul><li>Windows 11 with Docker Desktop running in Linux-container mode.</li><li>PowerShell 7 and a text editor such as VS Code.</li><li>Internet access to download container images and dependencies.</li><li>A working directory, used here as <code>C:\Users\User\myguestbook</code>.</li></ul>
+<p>The examples use explicit teaching baselines, not a claim that these are the latest versions. Review supported dependency versions before deploying a public application.</p>
+<h2 id="the-plan">The plan</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Stack</th><th scope="col">Folder</th><th scope="col">Local URL</th><th scope="col">Internal port</th></tr></thead><tbody><tr><td>PHP + Apache</td><td>php-apache</td><td>http://localhost:8081</td><td>80</td></tr><tr><td>PHP + Nginx / PHP-FPM</td><td>php-nginx</td><td>http://localhost:8082</td><td>80 (Nginx)</td></tr><tr><td>Java, plain HTTP server</td><td>java</td><td>http://localhost:8083</td><td>8080</td></tr><tr><td>Java Spring Boot</td><td>spring</td><td>http://localhost:8084</td><td>8080</td></tr><tr><td>ASP.NET Core</td><td>aspnet</td><td>http://localhost:8085</td><td>8080</td></tr><tr><td>Node.js / Express</td><td>node</td><td>http://localhost:8086</td><td>3000</td></tr><tr><td>Python / Flask + Gunicorn</td><td>python</td><td>http://localhost:8087</td><td>8000</td></tr></tbody></table></div>
+<p>All seven implement the same small API:</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Request</th><th scope="col">Result</th></tr></thead><tbody><tr><td><code>GET /</code></td><td>Guestbook HTML page</td></tr><tr><td><code>GET /api/entries</code></td><td>JSON array of the latest 100 comments: <code>comment</code> and <code>createdAt</code> only</td></tr><tr><td><code>POST /api/entries</code></td><td>URL-encoded <code>email</code> and <code>comment</code>; returns HTTP 201 and <code>{&quot;ok&quot;:true}</code></td></tr><tr><td>Invalid submission</td><td>HTTP 400 and a JSON <code>error</code> message</td></tr></tbody></table></div>
+<p>Both fields are required. To keep validation consistent across languages, this lesson accepts ASCII email addresses, up to 254 characters, with a simple <code>name@host.tld</code> shape. This is a format check, not proof that an address exists. Comments are trimmed, required, and limited to 2,000 UTF-8 bytes. The browser checks these rules for convenience, and every backend checks them again.</p>
+<p>Entries are saved as newline-delimited JSON in <code>/data/entries.jsonl</code>, outside the web root. One line contains <code>email</code>, <code>comment</code> and a UTC <code>createdAt</code> timestamp. This keeps the storage example small. PHP uses an OS file lock; the other implementations serialize access within one application process. Run exactly one instance per stack and keep Python at one worker. This storage design is not intended for multiple replicas or crash-safe transactional writes; use a database for those requirements.</p>
+<h2 id="step-0-create-the-project">Step 0: Create the project</h2>
+<p>Run this in PowerShell 7:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>docker version
+docker compose version
+$root = &#x27;C:\Users\User\myguestbook&#x27;
+New-Item -ItemType Directory -Force $root | Out-Null
+Set-Location $root
+&#x27;shared&#x27;,&#x27;php-apache&#x27;,&#x27;php-nginx&#x27;,&#x27;java&#x27;,&#x27;spring&#x27;,&#x27;aspnet&#x27;,&#x27;node&#x27;,&#x27;python&#x27; |
+    ForEach-Object { New-Item -ItemType Directory -Force $_ | Out-Null }</code></pre></div>
+<p>Use your editor to create the files shown below. Paths are relative to <code>$root</code> unless stated otherwise. Save text files as UTF-8 without a BOM, especially PHP files. This avoids placing bytes before HTTP response headers. If using PowerShell here-strings to write files, use a single-quoted here-string and <code>Set-Content -Encoding utf8</code>; its closing <code>&#x27;@</code> must start at the beginning of the line.</p>
+<h2 id="step-1-build-the-shared-guestbook-page">Step 1: Build the shared guestbook page</h2>
+<p>Create <code>shared/index.html</code>. All seven stacks use this same file.</p>
+<div class="code-block"><div class="code-bar"><span>html</span><button type="button" class="copy" aria-label="Copy html code">Copy</button></div><pre tabindex="0"><code>&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;title&gt;Guestbook&lt;/title&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f6fa; color: #17243a;
+      font: 16px/1.6 system-ui, sans-serif; }
+    header, footer { background: #12345a; color: white; padding: 24px; }
+    header h1, header p { margin: 0; }
+    main { max-width: 1000px; margin: 28px auto; padding: 0 20px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    section { background: white; padding: 24px; border-radius: 12px; }
+    h2 { margin-top: 0; }
+    label { display: block; font-weight: 600; margin-top: 16px; }
+    input, textarea, button { font: inherit; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #8090a5;
+      border-radius: 6px; }
+    textarea { min-height: 150px; resize: vertical; }
+    button { background: #12345a; color: white; border: 0;
+      border-radius: 6px; padding: 10px 18px; margin-top: 16px; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    small, time { color: #536278; }
+    article { border-top: 1px solid #dce3ed; padding: 16px 0; }
+    article p { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #status { min-height: 1.6em; }
+    footer { text-align: center; }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;&lt;h1&gt;Guestbook&lt;/h1&gt;&lt;p&gt;Thanks for visiting. Leave us a comment.&lt;/p&gt;&lt;/header&gt;
+  &lt;main&gt;
+    &lt;section aria-labelledby=&quot;form-title&quot;&gt;
+      &lt;h2 id=&quot;form-title&quot;&gt;Sign the guestbook&lt;/h2&gt;
+      &lt;form id=&quot;guestbook&quot;&gt;
+        &lt;label for=&quot;email&quot;&gt;Email address&lt;/label&gt;
+        &lt;input id=&quot;email&quot; name=&quot;email&quot; type=&quot;email&quot; required maxlength=&quot;254&quot;
+          autocomplete=&quot;email&quot; aria-describedby=&quot;privacy&quot;&gt;
+        &lt;small id=&quot;privacy&quot;&gt;We save your email, but do not display it publicly.&lt;/small&gt;
+        &lt;label for=&quot;comment&quot;&gt;Comment&lt;/label&gt;
+        &lt;textarea id=&quot;comment&quot; name=&quot;comment&quot; required maxlength=&quot;2000&quot;
+          aria-describedby=&quot;comment-help&quot;&gt;&lt;/textarea&gt;
+        &lt;small id=&quot;comment-help&quot;&gt;Your comment will be public. Maximum 2,000 UTF-8 bytes.&lt;/small&gt;
+        &lt;button type=&quot;submit&quot;&gt;Submit comment&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;p id=&quot;status&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;
+    &lt;/section&gt;
+    &lt;section aria-labelledby=&quot;entries-title&quot;&gt;
+      &lt;h2 id=&quot;entries-title&quot;&gt;Recent comments&lt;/h2&gt;
+      &lt;div id=&quot;entries&quot; aria-live=&quot;polite&quot;&gt;Loading comments...&lt;/div&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;Guestbook demo&lt;/footer&gt;
+  &lt;script&gt;
+    const form = document.querySelector(&#x27;#guestbook&#x27;);
+    const status = document.querySelector(&#x27;#status&#x27;);
+    const entries = document.querySelector(&#x27;#entries&#x27;);
+    async function loadEntries() {
+      const response = await fetch(&#x27;/api/entries&#x27;, { cache: &#x27;no-store&#x27; });
+      if (!response.ok) throw new Error(&#x27;Could not load comments.&#x27;);
+      const items = await response.json();
+      entries.replaceChildren();
+      if (!items.length) entries.textContent = &#x27;Be the first to leave a comment.&#x27;;
+      for (const item of items) {
+        const article = document.createElement(&#x27;article&#x27;);
+        const time = document.createElement(&#x27;time&#x27;);
+        time.dateTime = item.createdAt;
+        time.textContent = new Date(item.createdAt).toLocaleString();
+        const p = document.createElement(&#x27;p&#x27;);
+        p.textContent = item.comment;
+        article.append(time, p);
+        entries.append(article);
+      }
+    }
+    form.addEventListener(&#x27;submit&#x27;, async event =&gt; {
+      event.preventDefault();
+      const email = form.elements.email.value.trim();
+      const comment = form.elements.comment.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+          !/^[\x21-\x7e]+$/.test(email) || email.length &gt; 254) {
+        status.textContent = &#x27;Enter a valid ASCII email address.&#x27;;
+        return;
+      }
+      if (!comment || new TextEncoder().encode(comment).length &gt; 2000) {
+        status.textContent = &#x27;Enter a comment of 1 to 2,000 UTF-8 bytes.&#x27;;
+        return;
+      }
+      const button = form.querySelector(&#x27;button&#x27;);
+      button.disabled = true;
+      status.textContent = &#x27;Saving...&#x27;;
+      try {
+        const response = await fetch(&#x27;/api/entries&#x27;, {
+          method: &#x27;POST&#x27;,
+          body: new URLSearchParams({ email, comment })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || &#x27;Could not save comment.&#x27;);
+        form.reset();
+        status.textContent = &#x27;Thank you! Your comment has been saved.&#x27;;
+        try { await loadEntries(); }
+        catch { status.textContent += &#x27; Refresh the page to reload comments.&#x27;; }
+      } catch (error) {
+        status.textContent = error.message;
+      } finally { button.disabled = false; }
+    });
+    loadEntries().catch(error =&gt; { entries.textContent = error.message; });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div>
+<p>The page sends requests back to its own origin, so no CORS configuration is needed. It creates text nodes with <code>textContent</code> rather than inserting submitted HTML. A comment containing <code>&lt;script&gt;</code> is displayed as text. The initial load, empty state, submission success and failures all have visible messages. JavaScript is required for this version.</p>
+<h2 id="step-2-php-with-apache">Step 2: PHP with Apache</h2>
+<p>Create <code>shared/index.php</code>. Both PHP variants use this handler and the shared HTML file.</p>
+<div class="code-block"><div class="code-bar"><span>php</span><button type="button" class="copy" aria-label="Copy php code">Copy</button></div><pre tabindex="0"><code>&lt;?php
+declare(strict_types=1);
+$path = parse_url($_SERVER[&#x27;REQUEST_URI&#x27;], PHP_URL_PATH);
+$method = $_SERVER[&#x27;REQUEST_METHOD&#x27;];
+if ($path === &#x27;/&#x27; &amp;&amp; $method === &#x27;GET&#x27;) {
+    header(&#x27;Content-Type: text/html; charset=utf-8&#x27;);
+    readfile(__DIR__ . &#x27;/index.html&#x27;);
+    exit;
+}
+header(&#x27;Content-Type: application/json; charset=utf-8&#x27;);
+header(&#x27;Cache-Control: no-store&#x27;);
+function reply(int $code, array $body): never {
+    http_response_code($code);
+    echo json_encode($body, JSON_THROW_ON_ERROR);
+    exit;
+}
+if ($path !== &#x27;/api/entries&#x27;) reply(404, [&#x27;error&#x27; =&gt; &#x27;Not found.&#x27;]);
+if (!in_array($method, [&#x27;GET&#x27;, &#x27;POST&#x27;], true)) {
+    reply(405, [&#x27;error&#x27; =&gt; &#x27;Method not allowed.&#x27;]);
+}
+$email = $comment = &#x27;&#x27;;
+if ($method === &#x27;POST&#x27;) {
+    $type = strtolower(explode(&#x27;;&#x27;, $_SERVER[&#x27;CONTENT_TYPE&#x27;] ?? &#x27;&#x27;)[0]);
+    if ($type !== &#x27;application/x-www-form-urlencoded&#x27;) {
+        reply(415, [&#x27;error&#x27; =&gt; &#x27;Use a URL-encoded form.&#x27;]);
+    }
+    if (!is_string($_POST[&#x27;email&#x27;] ?? null) ||
+        !is_string($_POST[&#x27;comment&#x27;] ?? null)) {
+        reply(400, [&#x27;error&#x27; =&gt; &#x27;Email and comment are required.&#x27;]);
+    }
+    $email = trim($_POST[&#x27;email&#x27;]);
+    $comment = trim($_POST[&#x27;comment&#x27;]);
+    if (strlen($email) &gt; 254 || !preg_match(&#x27;/^[\x21-\x7e]+$/D&#x27;, $email) ||
+        !preg_match(&#x27;/^[^\s@]+@[^\s@]+\.[^\s@]+$/D&#x27;, $email) ||
+        $comment === &#x27;&#x27; || strlen($comment) &gt; 2000 ||
+        !preg_match(&#x27;//u&#x27;, $comment)) {
+        reply(400, [&#x27;error&#x27; =&gt; &#x27;Use a valid email and a comment of 1-2000 UTF-8 bytes.&#x27;]);
+    }
+}
+try {
+    $file = fopen(&#x27;/data/entries.jsonl&#x27;, &#x27;c+&#x27;);
+    if ($file === false || !flock($file, LOCK_EX)) {
+        throw new RuntimeException(&#x27;Storage unavailable&#x27;);
+    }
+    if ($method === &#x27;GET&#x27;) {
+        $items = [];
+        while (($line = fgets($file)) !== false) {
+            $row = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
+            $items[] = [&#x27;comment&#x27; =&gt; $row[&#x27;comment&#x27;], &#x27;createdAt&#x27; =&gt; $row[&#x27;createdAt&#x27;]];
+        }
+        $body = array_reverse(array_slice($items, -100));
+        $code = 200;
+    } else {
+        $row = [&#x27;email&#x27; =&gt; $email, &#x27;comment&#x27; =&gt; $comment,
+                &#x27;createdAt&#x27; =&gt; gmdate(&#x27;Y-m-d\TH:i:s\Z&#x27;)];
+        $line = json_encode($row, JSON_THROW_ON_ERROR) . &quot;\n&quot;;
+        fseek($file, 0, SEEK_END);
+        if (fwrite($file, $line) !== strlen($line) || !fflush($file)) {
+            throw new RuntimeException(&#x27;Write failed&#x27;);
+        }
+        $body = [&#x27;ok&#x27; =&gt; true];
+        $code = 201;
+    }
+    flock($file, LOCK_UN);
+    fclose($file);
+    reply($code, $body);
+} catch (Throwable $error) {
+    error_log($error-&gt;getMessage());
+    reply(500, [&#x27;error&#x27; =&gt; &#x27;Storage unavailable.&#x27;]);
+}</code></pre></div>
+<p>Create <code>php-apache/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM php:8.3-apache
+COPY index.php index.html /var/www/html/
+RUN mkdir -p /data &amp;&amp; chown www-data:www-data /data \
+    &amp;&amp; printf &#x27;FallbackResource /index.php\n&#x27; &gt; /var/www/html/.htaccess \
+    &amp;&amp; printf &#x27;&lt;Directory /var/www/html&gt;\nAllowOverride All\n&lt;/Directory&gt;\n&#x27; \
+       &gt; /etc/apache2/conf-available/guestbook.conf \
+    &amp;&amp; a2enconf guestbook
+EXPOSE 80</code></pre></div>
+<p>Copy the shared files, build and run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\php-apache&quot;
+Copy-Item ..\shared\index.html, ..\shared\index.php .
+docker build -t guestbook-php-apache .
+docker run -d --name guestbook-php-apache -p 127.0.0.1:8081:80 `
+    -v guestbook-php-apache-data:/data guestbook-php-apache
+Start-Process http://localhost:8081</code></pre></div>
+<p>Apache routes <code>/api/entries</code> to PHP through <code>FallbackResource</code>. <code>/data</code> is not publicly served. The named volume is initialized with the image directory&#x27;s ownership so the PHP user can write to it.</p>
+<h2 id="step-3-php-with-nginx-and-php-fpm">Step 3: PHP with Nginx and PHP-FPM</h2>
+<p>Nginx serves the page and forwards API requests to a separate PHP-FPM container. Reuse <code>shared/index.php</code>; do not write a second PHP backend.</p>
+<p>Create <code>php-nginx/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM php:8.3-fpm-alpine
+COPY index.php index.html /var/www/html/
+RUN mkdir -p /data &amp;&amp; chown www-data:www-data /data</code></pre></div>
+<p>Create <code>php-nginx/default.conf</code>:</p>
+<div class="code-block"><div class="code-bar"><span>nginx</span><button type="button" class="copy" aria-label="Copy nginx code">Copy</button></div><pre tabindex="0"><code>server {
+    listen 80;
+    root /var/www/html;
+    client_max_body_size 16k;
+    location = / {
+        try_files /index.html =404;
+    }
+    location = /api/entries {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /var/www/html/index.php;
+        fastcgi_pass php:9000;
+    }
+    location / { return 404; }
+}</code></pre></div>
+<p>Create <code>php-nginx/compose.yaml</code>:</p>
+<div class="code-block"><div class="code-bar"><span>yaml</span><button type="button" class="copy" aria-label="Copy yaml code">Copy</button></div><pre tabindex="0"><code>services:
+  php:
+    build: .
+    volumes:
+      - data:/data
+  nginx:
+    image: nginx:alpine
+    ports:
+      - &quot;127.0.0.1:8082:80&quot;
+    volumes:
+      - ./index.html:/var/www/html/index.html:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+volumes:
+  data:</code></pre></div>
+<p>Build and start:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\php-nginx&quot;
+Copy-Item ..\shared\index.html, ..\shared\index.php .
+docker compose up -d --build
+Start-Process http://localhost:8082</code></pre></div>
+<p>PHP-FPM is reachable only inside the Compose network. Nginx has no mount for <code>/data</code>. Updating the HTML takes a refresh; updating PHP requires <code>docker compose up -d --build</code>. <code>depends_on</code> starts PHP first but does not guarantee readiness; retry after a moment if the first request returns 502.</p>
+<h2 id="step-4-java-without-a-web-framework">Step 4: Java without a web framework</h2>
+<p>The JDK includes <code>HttpServer</code>. We add Jackson for JSON serialization, so Maven runs in the build image. This is still a plain Java HTTP server, without Spring. A shared storage class will also be used by the Spring variant.</p>
+<p>Create <code>shared/Store.java</code>:</p>
+<div class="code-block"><div class="code-bar"><span>java</span><button type="button" class="copy" aria-label="Copy java code">Copy</button></div><pre tabindex="0"><code>package demo;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.time.Instant;
+import java.util.*;
+
+public final class Store {
+    private final Path file = Path.of(&quot;/data/entries.jsonl&quot;);
+    private final ObjectMapper json = new ObjectMapper();
+
+    public static void validate(String email, String comment) {
+        if (email.length() &gt; 254 || !email.matches(&quot;[\\x21-\\x7e]+&quot;) ||
+            !email.matches(&quot;[^\\s@]+@[^\\s@]+\\.[^\\s@]+&quot;) ||
+            comment.isBlank() ||
+            comment.getBytes(StandardCharsets.UTF_8).length &gt; 2000) {
+            throw new IllegalArgumentException(
+                &quot;Use a valid email and a comment of 1-2000 UTF-8 bytes.&quot;);
+        }
+    }
+    public synchronized void add(String email, String comment) throws Exception {
+        validate(email, comment);
+        Files.createDirectories(file.getParent());
+        String line = json.writeValueAsString(Map.of(
+            &quot;email&quot;, email, &quot;comment&quot;, comment,
+            &quot;createdAt&quot;, Instant.now().toString())) + &quot;\n&quot;;
+        Files.writeString(file, line, StandardCharsets.UTF_8,
+            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+    public synchronized List&lt;Map&lt;String, String&gt;&gt; list() throws Exception {
+        List&lt;Map&lt;String, String&gt;&gt; items = new ArrayList&lt;&gt;();
+        if (!Files.exists(file)) return items;
+        for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
+            var row = json.readTree(line);
+            items.add(Map.of(&quot;comment&quot;, row.get(&quot;comment&quot;).asText(),
+                &quot;createdAt&quot;, row.get(&quot;createdAt&quot;).asText()));
+        }
+        Collections.reverse(items);
+        return new ArrayList&lt;&gt;(items.subList(0, Math.min(100, items.size())));
+    }
+}</code></pre></div>
+<p>Create <code>java/pom.xml</code>:</p>
+<div class="code-block"><div class="code-bar"><span>xml</span><button type="button" class="copy" aria-label="Copy xml code">Copy</button></div><pre tabindex="0"><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;demo&lt;/groupId&gt;&lt;artifactId&gt;guestbook&lt;/artifactId&gt;&lt;version&gt;1.0&lt;/version&gt;
+  &lt;properties&gt;
+    &lt;maven.compiler.release&gt;21&lt;/maven.compiler.release&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+  &lt;/properties&gt;
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;&lt;version&gt;2.18.2&lt;/version&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+  &lt;build&gt;&lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;&lt;version&gt;3.13.0&lt;/version&gt;
+    &lt;/plugin&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;&lt;version&gt;3.8.1&lt;/version&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;&lt;/build&gt;
+&lt;/project&gt;</code></pre></div>
+<p>Create <code>java/src/main/java/demo/Main.java</code>:</p>
+<div class="code-block"><div class="code-bar"><span>java</span><button type="button" class="copy" aria-label="Copy java code">Copy</button></div><pre tabindex="0"><code>package demo;
+
+import com.sun.net.httpserver.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.*;
+
+public class Main {
+    static final Store store = new Store();
+    static final ObjectMapper json = new ObjectMapper();
+    static void send(HttpExchange x, int code, Object body) throws Exception {
+        byte[] bytes = json.writeValueAsBytes(body);
+        x.getResponseHeaders().set(&quot;Content-Type&quot;, &quot;application/json; charset=utf-8&quot;);
+        x.getResponseHeaders().set(&quot;Cache-Control&quot;, &quot;no-store&quot;);
+        x.sendResponseHeaders(code, bytes.length);
+        x.getResponseBody().write(bytes);
+    }
+    public static void main(String[] args) throws Exception {
+        byte[] html = Files.readAllBytes(Path.of(&quot;public/index.html&quot;));
+        var server = HttpServer.create(new InetSocketAddress(8080), 0);
+        server.createContext(&quot;/&quot;, x -&gt; {
+            try {
+                String path = x.getRequestURI().getPath();
+                String method = x.getRequestMethod();
+                if (path.equals(&quot;/&quot;) &amp;&amp; method.equals(&quot;GET&quot;)) {
+                    x.getResponseHeaders().set(&quot;Content-Type&quot;, &quot;text/html; charset=utf-8&quot;);
+                    x.sendResponseHeaders(200, html.length);
+                    x.getResponseBody().write(html);
+                } else if (!path.equals(&quot;/api/entries&quot;)) {
+                    send(x, 404, Map.of(&quot;error&quot;, &quot;Not found.&quot;));
+                } else if (method.equals(&quot;GET&quot;)) {
+                    send(x, 200, store.list());
+                } else if (method.equals(&quot;POST&quot;)) {
+                    String type = x.getRequestHeaders().getFirst(&quot;Content-Type&quot;);
+                    if (type == null || !type.toLowerCase(Locale.ROOT)
+                            .startsWith(&quot;application/x-www-form-urlencoded&quot;)) {
+                        send(x, 415, Map.of(&quot;error&quot;, &quot;Use a URL-encoded form.&quot;));
+                        return;
+                    }
+                    byte[] raw = x.getRequestBody().readNBytes(16385);
+                    if (raw.length &gt; 16384) {
+                        send(x, 413, Map.of(&quot;error&quot;, &quot;Request too large.&quot;));
+                        return;
+                    }
+                    Map&lt;String, String&gt; form = new HashMap&lt;&gt;();
+                    for (String pair : new String(raw, StandardCharsets.UTF_8).split(&quot;&amp;&quot;)) {
+                        String[] parts = pair.split(&quot;=&quot;, 2);
+                        if (parts.length == 2) form.put(
+                            URLDecoder.decode(parts[0], StandardCharsets.UTF_8),
+                            URLDecoder.decode(parts[1], StandardCharsets.UTF_8));
+                    }
+                    store.add(form.getOrDefault(&quot;email&quot;, &quot;&quot;).trim(),
+                              form.getOrDefault(&quot;comment&quot;, &quot;&quot;).trim());
+                    send(x, 201, Map.of(&quot;ok&quot;, true));
+                } else send(x, 405, Map.of(&quot;error&quot;, &quot;Method not allowed.&quot;));
+            } catch (IllegalArgumentException e) {
+                try { send(x, 400, Map.of(&quot;error&quot;, &quot;Invalid email or comment.&quot;)); }
+                catch (Exception ignored) { }
+            } catch (Exception e) {
+                e.printStackTrace();
+                try { send(x, 500, Map.of(&quot;error&quot;, &quot;Storage unavailable.&quot;)); }
+                catch (Exception ignored) { }
+            } finally { x.close(); }
+        });
+        server.start();
+    }
+}</code></pre></div>
+<p>Create <code>java/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /src
+COPY pom.xml .
+COPY src/ src/
+RUN mvn -q package dependency:copy-dependencies -DskipTests
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /src/target/classes/ classes/
+COPY --from=build /src/target/dependency/ lib/
+COPY public/ public/
+RUN mkdir -p /data
+EXPOSE 8080
+CMD [&quot;java&quot;, &quot;-cp&quot;, &quot;classes:lib/*&quot;, &quot;demo.Main&quot;]</code></pre></div>
+<p>Before saving <code>Main.java</code>, create its parent directory. Then copy the common files, build and run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\java&quot;
+New-Item -ItemType Directory -Force src\main\java\demo, public | Out-Null
+# Save Main.java in src\main\java\demo before continuing.
+Copy-Item ..\shared\Store.java src\main\java\demo\Store.java
+Copy-Item ..\shared\index.html public\index.html
+docker build -t guestbook-java .
+docker run -d --name guestbook-java -p 127.0.0.1:8083:8080 `
+    -v guestbook-java-data:/data guestbook-java
+Start-Process http://localhost:8083</code></pre></div>
+<p>The route handler decodes URL-encoded form fields, then calls the same validation and storage methods used by Spring. Returning JSON through Jackson avoids hand-built JSON strings.</p>
+<h2 id="step-5-java-spring-boot">Step 5: Java Spring Boot</h2>
+<p>Spring supplies routing, form parameter binding and JSON responses. We keep <code>Store.java</code> so both Java examples have the same storage behavior.</p>
+<p>Create <code>spring/pom.xml</code>:</p>
+<div class="code-block"><div class="code-bar"><span>xml</span><button type="button" class="copy" aria-label="Copy xml code">Copy</button></div><pre tabindex="0"><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;&lt;version&gt;3.5.0&lt;/version&gt;
+  &lt;/parent&gt;
+  &lt;groupId&gt;demo&lt;/groupId&gt;&lt;artifactId&gt;guestbook&lt;/artifactId&gt;&lt;version&gt;1.0&lt;/version&gt;
+  &lt;properties&gt;&lt;java.version&gt;21&lt;/java.version&gt;&lt;/properties&gt;
+  &lt;dependencies&gt;&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+  &lt;/dependency&gt;&lt;/dependencies&gt;
+  &lt;build&gt;&lt;plugins&gt;&lt;plugin&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+  &lt;/plugin&gt;&lt;/plugins&gt;&lt;/build&gt;
+&lt;/project&gt;</code></pre></div>
+<p>Create <code>spring/src/main/java/demo/GuestbookApplication.java</code>:</p>
+<div class="code-block"><div class="code-bar"><span>java</span><button type="button" class="copy" aria-label="Copy java code">Copy</button></div><pre tabindex="0"><code>package demo;
+
+import java.util.*;
+import org.springframework.boot.*;
+import org.springframework.boot.autoconfigure.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+
+@SpringBootApplication
+@RestController
+public class GuestbookApplication {
+    private final Store store = new Store();
+    public static void main(String[] args) {
+        SpringApplication.run(GuestbookApplication.class, args);
+    }
+    @GetMapping(&quot;/api/entries&quot;)
+    public ResponseEntity&lt;?&gt; list() throws Exception {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            .body(store.list());
+    }
+    @PostMapping(value = &quot;/api/entries&quot;,
+                 consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity&lt;?&gt; add(
+        @RequestParam(defaultValue = &quot;&quot;) String email,
+        @RequestParam(defaultValue = &quot;&quot;) String comment) throws Exception {
+        store.add(email.trim(), comment.trim());
+        return ResponseEntity.status(201).body(Map.of(&quot;ok&quot;, true));
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;?&gt; invalid(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Map.of(&quot;error&quot;, e.getMessage()));
+    }
+    @ExceptionHandler(java.io.IOException.class)
+    public ResponseEntity&lt;?&gt; storage(java.io.IOException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(Map.of(&quot;error&quot;, &quot;Storage unavailable.&quot;));
+    }
+}</code></pre></div>
+<p>Create <code>spring/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /src
+COPY pom.xml .
+COPY src/ src/
+RUN mvn -q package -DskipTests
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /src/target/guestbook-1.0.jar app.jar
+RUN mkdir -p /data
+EXPOSE 8080
+ENTRYPOINT [&quot;java&quot;, &quot;-jar&quot;, &quot;app.jar&quot;]</code></pre></div>
+<p>Prepare directories before saving the Java source, then build:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\spring&quot;
+New-Item -ItemType Directory -Force src\main\java\demo, `
+    src\main\resources\static | Out-Null
+# Save GuestbookApplication.java in src\main\java\demo before continuing.
+Copy-Item ..\shared\Store.java src\main\java\demo\Store.java
+Copy-Item ..\shared\index.html src\main\resources\static\index.html
+docker build -t guestbook-spring .
+docker run -d --name guestbook-spring -p 127.0.0.1:8084:8080 `
+    -v guestbook-spring-data:/data guestbook-spring
+Start-Process http://localhost:8084</code></pre></div>
+<p>Spring serves <code>static/index.html</code> as the home page. Give it time to start; inspect <code>docker logs guestbook-spring</code> if it is not ready.</p>
+<h2 id="step-6-asp-net-core">Step 6: ASP.NET Core</h2>
+<p>Create <code>aspnet/Guestbook.csproj</code>:</p>
+<div class="code-block"><div class="code-bar"><span>xml</span><button type="button" class="copy" aria-label="Copy xml code">Copy</button></div><pre tabindex="0"><code>&lt;Project Sdk=&quot;Microsoft.NET.Sdk.Web&quot;&gt;
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</code></pre></div>
+<p>Create <code>aspnet/Program.cs</code>:</p>
+<div class="code-block"><div class="code-bar"><span>csharp</span><button type="button" class="copy" aria-label="Copy csharp code">Copy</button></div><pre tabindex="0"><code>using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+var gate = new object();
+var file = &quot;/data/entries.jsonl&quot;;
+Directory.CreateDirectory(&quot;/data&quot;);
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapGet(&quot;/api/entries&quot;, (HttpContext context) =&gt; {
+    context.Response.Headers.CacheControl = &quot;no-store&quot;;
+    lock (gate) {
+        var rows = File.Exists(file)
+            ? File.ReadAllLines(file).Select(line =&gt;
+                JsonSerializer.Deserialize&lt;Entry&gt;(line)!).ToList()
+            : new List&lt;Entry&gt;();
+        return Results.Json(rows.AsEnumerable().Reverse().Take(100)
+            .Select(row =&gt; new { comment = row.Comment, createdAt = row.CreatedAt }));
+    }
+});
+app.MapPost(&quot;/api/entries&quot;, async (HttpRequest request) =&gt; {
+    if (!(request.ContentType ?? &quot;&quot;).StartsWith(
+            &quot;application/x-www-form-urlencoded&quot;, StringComparison.OrdinalIgnoreCase))
+        return Results.Json(new { error = &quot;Use a URL-encoded form.&quot; }, statusCode: 415);
+    var form = await request.ReadFormAsync();
+    var email = form[&quot;email&quot;].ToString().Trim();
+    var comment = form[&quot;comment&quot;].ToString().Trim();
+    if (email.Length &gt; 254 || !Regex.IsMatch(email, @&quot;\A[\x21-\x7e]+\z&quot;) ||
+        !Regex.IsMatch(email, @&quot;\A[^\s@]+@[^\s@]+\.[^\s@]+\z&quot;) ||
+        comment.Length == 0 || Encoding.UTF8.GetByteCount(comment) &gt; 2000)
+        return Results.BadRequest(new {
+            error = &quot;Use a valid email and a comment of 1-2000 UTF-8 bytes.&quot; });
+    try {
+        lock (gate) {
+            var row = new Entry(email, comment, DateTimeOffset.UtcNow.ToString(&quot;O&quot;));
+            File.AppendAllText(file, JsonSerializer.Serialize(row) + &quot;\n&quot;);
+        }
+        return Results.Json(new { ok = true }, statusCode: 201);
+    } catch (IOException error) {
+        app.Logger.LogError(error, &quot;Guestbook write failed&quot;);
+        return Results.Json(new { error = &quot;Storage unavailable.&quot; }, statusCode: 500);
+    }
+});
+app.Run();
+record Entry(string Email, string Comment, string CreatedAt);</code></pre></div>
+<p>This handler reads the form explicitly from <code>HttpRequest</code>. It does not use inferred <code>IFormCollection</code> binding. The stored C# property names are PascalCase, while the public projection uses the common <code>comment</code> and <code>createdAt</code> names; the files are private to each stack.</p>
+<p>Create <code>aspnet/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY Guestbook.csproj .
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c Release -o /out
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /out .
+RUN mkdir -p /data
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+ENTRYPOINT [&quot;dotnet&quot;, &quot;Guestbook.dll&quot;]</code></pre></div>
+<p>Build and run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\aspnet&quot;
+New-Item -ItemType Directory -Force wwwroot | Out-Null
+Copy-Item ..\shared\index.html wwwroot\index.html
+docker build -t guestbook-aspnet .
+docker run -d --name guestbook-aspnet -p 127.0.0.1:8085:8080 `
+    -v guestbook-aspnet-data:/data guestbook-aspnet
+Start-Process http://localhost:8085</code></pre></div>
+<h2 id="step-7-node-js-with-express">Step 7: Node.js with Express</h2>
+<p>Create <code>node/package.json</code>:</p>
+<div class="code-block"><div class="code-bar"><span>json</span><button type="button" class="copy" aria-label="Copy json code">Copy</button></div><pre tabindex="0"><code>{
+  &quot;name&quot;: &quot;guestbook&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;private&quot;: true,
+  &quot;scripts&quot;: { &quot;start&quot;: &quot;node server.js&quot; },
+  &quot;dependencies&quot;: { &quot;express&quot;: &quot;4.21.2&quot; }
+}</code></pre></div>
+<p>Create <code>node/server.js</code>:</p>
+<div class="code-block"><div class="code-bar"><span>javascript</span><button type="button" class="copy" aria-label="Copy javascript code">Copy</button></div><pre tabindex="0"><code>const express = require(&#x27;express&#x27;);
+const fs = require(&#x27;node:fs&#x27;);
+const path = require(&#x27;node:path&#x27;);
+const app = express();
+const file = &#x27;/data/entries.jsonl&#x27;;
+fs.mkdirSync(&#x27;/data&#x27;, { recursive: true });
+app.use(express.urlencoded({ extended: false, limit: &#x27;16kb&#x27; }));
+app.use(express.static(path.join(__dirname, &#x27;public&#x27;)));
+app.get(&#x27;/api/entries&#x27;, (req, res, next) =&gt; {
+  try {
+    const rows = fs.existsSync(file)
+      ? fs.readFileSync(file, &#x27;utf8&#x27;).split(&#x27;\n&#x27;).filter(Boolean).map(JSON.parse)
+      : [];
+    res.set(&#x27;Cache-Control&#x27;, &#x27;no-store&#x27;).json(rows.slice(-100).reverse()
+      .map(({ comment, createdAt }) =&gt; ({ comment, createdAt })));
+  } catch (error) { next(error); }
+});
+app.post(&#x27;/api/entries&#x27;, (req, res, next) =&gt; {
+  if (!req.is(&#x27;application/x-www-form-urlencoded&#x27;))
+    return res.status(415).json({ error: &#x27;Use a URL-encoded form.&#x27; });
+  const email = typeof req.body.email === &#x27;string&#x27; ? req.body.email.trim() : &#x27;&#x27;;
+  const comment = typeof req.body.comment === &#x27;string&#x27; ? req.body.comment.trim() : &#x27;&#x27;;
+  if (email.length &gt; 254 || !/^[\x21-\x7e]+$/.test(email) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+      !comment || Buffer.byteLength(comment, &#x27;utf8&#x27;) &gt; 2000)
+    return res.status(400).json({
+      error: &#x27;Use a valid email and a comment of 1-2000 UTF-8 bytes.&#x27;
+    });
+  try {
+    fs.appendFileSync(file, JSON.stringify({
+      email, comment, createdAt: new Date().toISOString()
+    }) + &#x27;\n&#x27;);
+    res.status(201).json({ ok: true });
+  } catch (error) { next(error); }
+});
+app.use(&#x27;/api/entries&#x27;, (req, res) =&gt; {
+  res.status(405).json({ error: &#x27;Method not allowed.&#x27; });
+});
+app.use((error, req, res, next) =&gt; {
+  console.error(error.message);
+  const status = error.status === 413 ? 413 : error.status === 400 ? 400 : 500;
+  res.status(status).json({ error: status === 413 ? &#x27;Request too large.&#x27; :
+    status === 400 ? &#x27;Invalid form.&#x27; : &#x27;Storage unavailable.&#x27; });
+});
+app.listen(3000, &#x27;0.0.0.0&#x27;, () =&gt; console.log(&#x27;Guestbook on port 3000&#x27;));</code></pre></div>
+<p>The synchronous file operations keep the read/write sequence serialized in this one Node process. They also block the event loop, which is acceptable for this small exercise but a reason to switch to a database for a busy site.</p>
+<p>Create <code>node/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM node:22-alpine
+WORKDIR /app
+COPY package.json .
+RUN npm install --omit=dev
+COPY server.js .
+COPY public/ public/
+RUN mkdir -p /data
+EXPOSE 3000
+CMD [&quot;node&quot;, &quot;server.js&quot;]</code></pre></div>
+<p>Build and run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\node&quot;
+New-Item -ItemType Directory -Force public | Out-Null
+Copy-Item ..\shared\index.html public\index.html
+docker build -t guestbook-node .
+docker run -d --name guestbook-node -p 127.0.0.1:8086:3000 `
+    -v guestbook-node-data:/data guestbook-node
+Start-Process http://localhost:8086</code></pre></div>
+<p>For reproducible dependency resolution in a maintained project, commit a generated <code>package-lock.json</code> and change the build to <code>COPY package*.json ./</code> followed by <code>npm ci --omit=dev</code>.</p>
+<h2 id="step-8-python-with-flask-and-gunicorn">Step 8: Python with Flask and Gunicorn</h2>
+<p>Create <code>python/requirements.txt</code>:</p>
+<div class="code-block"><div class="code-bar"><span>text</span><button type="button" class="copy" aria-label="Copy text code">Copy</button></div><pre tabindex="0"><code>Flask==3.1.0
+gunicorn==23.0.0</code></pre></div>
+<p>Create <code>python/app.py</code>:</p>
+<div class="code-block"><div class="code-bar"><span>python</span><button type="button" class="copy" aria-label="Copy python code">Copy</button></div><pre tabindex="0"><code>import json
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from threading import Lock
+from flask import Flask, jsonify, request
+
+app = Flask(__name__, static_folder=&quot;public&quot;, static_url_path=&quot;&quot;)
+app.config[&quot;MAX_CONTENT_LENGTH&quot;] = 16 * 1024
+file = Path(&quot;/data/entries.jsonl&quot;)
+file.parent.mkdir(parents=True, exist_ok=True)
+gate = Lock()
+
+@app.get(&quot;/&quot;)
+def home():
+    return app.send_static_file(&quot;index.html&quot;)
+
+@app.get(&quot;/api/entries&quot;)
+def entries():
+    with gate:
+        rows = [json.loads(line) for line in file.read_text(encoding=&quot;utf-8&quot;).splitlines()] \
+            if file.exists() else []
+    public = [{&quot;comment&quot;: row[&quot;comment&quot;], &quot;createdAt&quot;: row[&quot;createdAt&quot;]}
+              for row in rows[-100:][::-1]]
+    response = jsonify(public)
+    response.headers[&quot;Cache-Control&quot;] = &quot;no-store&quot;
+    return response
+
+@app.post(&quot;/api/entries&quot;)
+def add():
+    if request.mimetype != &quot;application/x-www-form-urlencoded&quot;:
+        return jsonify(error=&quot;Use a URL-encoded form.&quot;), 415
+    email = request.form.get(&quot;email&quot;, &quot;&quot;).strip()
+    comment = request.form.get(&quot;comment&quot;, &quot;&quot;).strip()
+    if (len(email) &gt; 254 or not re.fullmatch(r&quot;[\x21-\x7e]+&quot;, email)
+            or not re.fullmatch(r&quot;[^\s@]+@[^\s@]+\.[^\s@]+&quot;, email)
+            or not comment or len(comment.encode(&quot;utf-8&quot;)) &gt; 2000):
+        return jsonify(error=&quot;Use a valid email and a comment of 1-2000 UTF-8 bytes.&quot;), 400
+    row = {&quot;email&quot;: email, &quot;comment&quot;: comment,
+           &quot;createdAt&quot;: datetime.now(timezone.utc).isoformat()}
+    with gate:
+        with file.open(&quot;a&quot;, encoding=&quot;utf-8&quot;) as stream:
+            stream.write(json.dumps(row, ensure_ascii=False) + &quot;\n&quot;)
+    return jsonify(ok=True), 201
+
+@app.errorhandler(413)
+def too_large(error):
+    return jsonify(error=&quot;Request too large.&quot;), 413
+
+@app.errorhandler(OSError)
+def storage_error(error):
+    app.logger.exception(&quot;Storage unavailable&quot;)
+    return jsonify(error=&quot;Storage unavailable.&quot;), 500</code></pre></div>
+<p>Create <code>python/Dockerfile</code>:</p>
+<div class="code-block"><div class="code-bar"><span>dockerfile</span><button type="button" class="copy" aria-label="Copy dockerfile code">Copy</button></div><pre tabindex="0"><code>FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app.py .
+COPY public/ public/
+RUN mkdir -p /data
+EXPOSE 8000
+CMD [&quot;gunicorn&quot;, &quot;--workers&quot;, &quot;1&quot;, &quot;--threads&quot;, &quot;4&quot;, &quot;-b&quot;, &quot;0.0.0.0:8000&quot;, &quot;app:app&quot;]</code></pre></div>
+<p>Build and run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>Set-Location &quot;$root\python&quot;
+New-Item -ItemType Directory -Force public | Out-Null
+Copy-Item ..\shared\index.html public\index.html
+docker build -t guestbook-python .
+docker run -d --name guestbook-python -p 127.0.0.1:8087:8000 `
+    -v guestbook-python-data:/data guestbook-python
+Start-Process http://localhost:8087</code></pre></div>
+<p>Gunicorn serves Flask instead of its development server. Keep <code>--workers 1</code>: a <code>threading.Lock</code> coordinates threads in one process, not independent worker processes.</p>
+<h2 id="step-9-verify-the-complete-workflow">Step 9: Verify the complete workflow</h2>
+<p>A home page returning HTTP 200 is no longer enough. Check the form, validation, public response and persistence.</p>
+<p>First confirm the containers are running:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>docker ps --format &quot;table {{.Names}}\t{{.Ports}}\t{{.Status}}&quot;</code></pre></div>
+<p>The following PowerShell 7 test creates one entry in every stack. Run only against the stacks you started by changing the port range. It uses a unique marker, checks validation and verifies that the submitted email is absent from the public JSON.</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>$marker = [guid]::NewGuid().ToString(&#x27;N&#x27;)
+foreach ($port in 8081..8087) {
+    $base = &quot;http://localhost:$port&quot;
+    $page = Invoke-WebRequest &quot;$base/&quot;
+    if ($page.StatusCode -ne 200) { throw &quot;Page failed on $port&quot; }
+    $body = @{ email = &#x27;visitor@example.com&#x27;; comment = &quot;Hello $marker&quot; }
+    $saved = Invoke-WebRequest &quot;$base/api/entries&quot; -Method Post `
+        -ContentType &#x27;application/x-www-form-urlencoded&#x27; -Body $body
+    if ($saved.StatusCode -ne 201) { throw &quot;Save failed on $port&quot; }
+    $public = Invoke-WebRequest &quot;$base/api/entries&quot;
+    $rows = @($public.Content | ConvertFrom-Json)
+    if (-not ($rows | Where-Object comment -eq &quot;Hello $marker&quot;)) {
+        throw &quot;Saved comment missing on $port&quot;
+    }
+    if ($public.Content -match &#x27;visitor@example.com&#x27; -or
+        $public.Content -match &#x27;&quot;email&quot;\s*:&#x27;) {
+        throw &quot;Email leaked on $port&quot;
+    }
+    $bad = Invoke-WebRequest &quot;$base/api/entries&quot; -Method Post `
+        -ContentType &#x27;application/x-www-form-urlencoded&#x27; `
+        -Body @{ email = &#x27;invalid&#x27;; comment = &#x27;Hello&#x27; } -SkipHttpErrorCheck
+    if ($bad.StatusCode -ne 400) { throw &quot;Validation failed on $port&quot; }
+    &quot;Port ${port}: page, submission, privacy and validation passed&quot;
+}</code></pre></div>
+<p>In PowerShell interpolation, use <code>${port}</code> before a colon.</p>
+<p>Now open a guestbook in the browser and check:</p>
+<ol><li>Submit a valid email and comment. The thank-you message appears and the comment is listed.</li><li>Refresh the page. The saved comment remains.</li><li>Submit a comment containing <code>&lt;script&gt;alert(&#x27;test&#x27;)&lt;/script&gt;</code>. It must appear as text without an alert.</li><li>Submit a blank comment and an invalid email through the API. Each must return HTTP 400.</li><li>Try a comment longer than 2,000 UTF-8 bytes. The client and server should reject it. Non-ASCII characters can use more than one byte.</li><li>Use the browser network panel to inspect <code>GET /api/entries</code>. No email address should appear.</li></ol>
+<p>Test persistence by recreating the Node container with its existing volume:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>docker rm -f guestbook-node
+docker run -d --name guestbook-node -p 127.0.0.1:8086:3000 `
+    -v guestbook-node-data:/data guestbook-node
+Invoke-RestMethod http://localhost:8086/api/entries</code></pre></div>
+<p>The previous comment should still be present. Repeat with the corresponding image, ports and volume for another stack. For Nginx/PHP, run <code>docker compose down</code> followed by <code>docker compose up -d</code> in <code>php-nginx</code>; do not add <code>-v</code>.</p>
+<h2 id="what-changed-from-the-portal-tutorial">What changed from the portal tutorial?</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Static portal</th><th scope="col">Guestbook</th></tr></thead><tbody><tr><td>One HTML file with announcements and quick links</td><td>Shared email/comment form and recent comments</td></tr><tr><td>Backends mostly serve static files</td><td>Each backend validates submissions and saves entries</td></tr><tr><td>No application data</td><td>Per-stack persistent Docker volume</td></tr><tr><td>Verify HTTP 200</td><td>Verify POST, validation, private email handling and persistence</td></tr><tr><td>Compare static file serving</td><td>Compare routing, request parsing, JSON and storage code</td></tr></tbody></table></div>
+<p>PHP uses one request handler in both web-server arrangements. Plain Java exposes the request handling details. Spring provides annotations and automatic serialization. ASP.NET Core uses minimal API routes. Express and Flask keep the handlers compact. The UI and API contract stay the same, making the differences easier to inspect.</p>
+<h2 id="updating-the-shared-page">Updating the shared page</h2>
+<p>Edit <code>shared/index.html</code>, then copy it again into the stack&#x27;s web directory. Rebuild the image, remove the old container and rerun the original command with the same named volume. For PHP/Nginx, copy the page into <code>php-nginx/index.html</code> and refresh; rebuild only when the PHP code changes.</p>
+<p>A Docker build does not update an already running container. Keeping the original volume name is what preserves the guestbook when the container is replaced.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Symptom</th><th scope="col">What to check</th></tr></thead><tbody><tr><td>Port already allocated</td><td>Change the host port, for example <code>127.0.0.1:9081:80</code>, and use that URL.</td></tr><tr><td>Container stops immediately</td><td>Run <code>docker logs &lt;container-name&gt;</code>. For Compose use <code>docker compose logs</code>.</td></tr><tr><td>Form says storage unavailable</td><td>Check <code>/data</code> ownership and the volume mount. PHP must be able to write as <code>www-data</code>.</td></tr><tr><td>Page works but API returns 404</td><td>Check Apache fallback configuration, Nginx&#x27;s exact API location, or the backend route.</td></tr><tr><td>Nginx returns 502</td><td>Inspect <code>docker compose logs php</code>; wait for PHP-FPM to be ready.</td></tr><tr><td>Comment disappears after replacement</td><td>Verify the same named volume is mounted at <code>/data</code>; do not remove the volume.</td></tr><tr><td>UI changes do not appear</td><td>Recopy the shared HTML into the stack folder, rebuild where needed, recreate and refresh.</td></tr><tr><td>JSON parsing fails</td><td>Inspect the network response and container logs; PHP files must not have a BOM or stray output before <code>&lt;?php</code>.</td></tr><tr><td>Entries file is malformed after interruption</td><td>Restore a backup or inspect the private file offline. Do not silently discard damaged data. Use a database for transactional durability.</td></tr><tr><td>Duplicate comment after retry</td><td>This demo has no idempotency key. A network failure can occur after the server saves; check the list before retrying.</td></tr></tbody></table></div>
+<h2 id="before-making-it-public">Before making it public</h2>
+<p>The containers bind to <code>127.0.0.1</code> for local use. A public guestbook needs a database with transactions, HTTPS, rate limiting, spam controls, request-size limits across every stack, a moderation policy, and a retention/deletion process for saved email addresses. Collecting an email does not subscribe someone to a mailing list or verify their identity. Add authentication before exposing an administration view or export containing emails. Add suitable cross-site submission protection when you publish the form, and CSRF protection if you introduce cookie-authenticated actions.</p>
+<p>The demo displays comments immediately. If approval is needed, add a moderation status and publish only approved comments. Do not add an unauthenticated endpoint that returns the stored records, because those records contain private email addresses.</p>
+<p>For a growing guestbook, replace the file store with SQLite for a single-instance application or a server database for multiple instances. Every listing currently scans the full file even though it returns only 100 entries. File locks and process locks prevent ordinary overlapping writes in the stated configuration; they are not a substitute for database transactions, backups or recovery.</p>
+<h2 id="clean-up-while-retaining-entries">Clean up while retaining entries</h2>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>docker rm -f guestbook-php-apache guestbook-java guestbook-spring `
+    guestbook-aspnet guestbook-node guestbook-python
+Set-Location &quot;$root\php-nginx&quot;
+docker compose down</code></pre></div>
+<p>These commands remove the containers but preserve the data volumes. Removing images also leaves the volumes intact.</p>
+<p>Only if you deliberately want to erase the saved emails and comments, run:</p>
+<div class="code-block"><div class="code-bar"><span>powershell</span><button type="button" class="copy" aria-label="Copy powershell code">Copy</button></div><pre tabindex="0"><code>docker volume rm guestbook-php-apache-data guestbook-java-data `
+    guestbook-spring-data guestbook-aspnet-data guestbook-node-data `
+    guestbook-python-data
+# Deletes the PHP/Nginx guestbook volume as well:
+Set-Location &quot;$root\php-nginx&quot;
+docker compose down -v</code></pre></div>
+<p>You now have the same working guestbook in seven stacks. The exercise covers the parts a static page cannot demonstrate: handling user input, validating it on the server, keeping private fields out of public responses, and retaining data beyond a container&#x27;s lifetime.</p>
+<h2 id="documentation-references">Documentation references</h2>
+<ul><li>PHP advisory file locking: <a href="https://www.php.net/manual/en/function.flock.php">https://www.php.net/manual/en/function.flock.php</a></li><li>Java HttpServer: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html">https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html</a></li><li>Spring Boot 3.5 system requirements: <a href="https://docs.spring.io/spring-boot/3.5/system-requirements.html">https://docs.spring.io/spring-boot/3.5/system-requirements.html</a></li><li>ASP.NET Core minimal APIs: <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis">https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis</a></li><li>Express API: <a href="https://expressjs.com/en/4x/api.html">https://expressjs.com/en/4x/api.html</a></li><li>Flask API: <a href="https://flask.palletsprojects.com/en/stable/api/">https://flask.palletsprojects.com/en/stable/api/</a></li><li>Gunicorn worker settings: <a href="https://docs.gunicorn.org/en/stable/settings.html">https://docs.gunicorn.org/en/stable/settings.html</a></li><li>Docker volumes: <a href="https://docs.docker.com/engine/storage/volumes/">https://docs.docker.com/engine/storage/volumes/</a></li></ul></main></div><footer>One Guestbook, Seven Stacks · A practical Docker tutorial</footer>
+<script>
+document.querySelectorAll('.copy').forEach(button => {
+ button.addEventListener('click', async () => {
+  const text = button.closest('.code-block').querySelector('pre code').textContent;
+  try {
+   if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+   else {
+    const field = document.createElement('textarea'); field.value = text;
+    field.style.position = 'fixed'; field.style.opacity = '0';
+    document.body.append(field); field.select();
+    const ok = document.execCommand('copy'); field.remove();
+    if (!ok) throw new Error('Copy unavailable');
+   }
+   button.textContent = 'Copied';
+  } catch { button.textContent = 'Select code to copy'; }
+  setTimeout(() => { button.textContent = 'Copy'; }, 2200);
+ });
+});
+</script></body></html>
